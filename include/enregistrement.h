@@ -1,26 +1,13 @@
 #ifndef ENREGISTREMENT_H
 #define ENREGISTREMENT_H
-#include "planification.h"
+
+#include "types.h"
     
     /*prototype de recuperation des infor sur les clients*/
-    typedef struct{
-        char nom_client[100];
-        int date_debut;
-        int date_fin;
-    }client;
-    typedef struct {
-        char status[20];
-        char nom_occupant[100];
-        int day;
-    }jours;
 
-    client Recupération_infos_client();
+    client Recupération_infos_client(void);
 
-    //remplir_la_table_jours(table_jours,nombres_jours); 
-    //void remplir_table_jours(jours table_jours[]);
-
-    // fonction d'affichage du planning
-    //void affichage_planning(jours table_jours[], client tab[], int taille_tab);
+    void affiche(client tab[], int taille);
 
     // prototypes des fonctions tableaux de liste de reservation et de la file d'attente  
 

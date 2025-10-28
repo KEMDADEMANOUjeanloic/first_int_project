@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "planification.h": "c"
+        "planification.h": "c",
+        "enregistrement.h": "c"
     }
 }
