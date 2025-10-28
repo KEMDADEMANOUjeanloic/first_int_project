@@ -1,0 +1,29 @@
+Planification d'une chambre d'hotel
+
+la chambre est caractérisé par:
+    -sa disponibiliter 
+    -son statut
+
+le client est caractérisé par sa reservation qui contient:
+    -sa chambre
+    -son nombre de jour(jour d'arrivé, jour de départ)
+    
+PLANIFICATION 
+lorsque une reservation arrive, s'il ya pas de conflit avec les autres reservation,elle est planifier.Mais s'il y'a conflit, 
+on propase au client s'il peut modifier pour   une autres durée ou il y'aura pas de conflit. S'il accepte,sa reservation est planifier
+sinon on le place en file d'attente et on prend la reservation suivantes.Cela jusqu'a ce que la durée de disponibiliter de la 
+chambre.
+
+REPLANIFICATION
+
+**annulation
+si une client annule sa reservation, on verifie s'il y'a quelqu'un dans la file qui peut occupé sa place. sinon on verifie si u autre 
+client déjà planifier peut occupé.dans le cas contaire on prend une nouvelle reservation s'il y'en a.
+**pronlongement 
+si un séjour est prolonger, s'il y'a possiblité de prolongé, on le fait, sinon elle est refuser
+**retard
+si un client a un retard, pendand les jour(s) de retard, on peut accorder a quelu'un de la file ou a un nouveau client. Ou encore 
+accepter le pronlongement d'un client déjà planifier.
+
+
+
