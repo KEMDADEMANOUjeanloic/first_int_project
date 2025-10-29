@@ -14,7 +14,7 @@ static void vider_entree(void) {
 client Recupération_infos_client(){
     client client_i;
     int test;
-    printf("\n=====nouveau enregistrement==\n");
+    printf("\n===== nouveau enregistrement =====\n");
     printf("\nEntrez votre nom : ");
     test = scanf("%49s",client_i.nom_client);
     
@@ -47,8 +47,8 @@ void fonction_reservation(client **reserver,int *taille_reserver, client temp, i
         client *exist = &((*reserver)[i]);
         if (!(exist->date_fin < temp.date_debut || temp.date_fin < exist->date_debut)){
             affichage_planning(table_jours,*reserver, *taille_reserver);
-            printf("\nDÉSOLÉ!!! VOTRE SEJOUR EST ENCONFLIT AVEC UN DE NOS CLIENTS .\n");
-            printf("\nVOULLEZ VOUS MODIFIER ? !!!!!( 0 pour NON et 1 pour OUI )!!!! : \n");
+            printf("\nDÉSOLÉ!!! VOTRE SÉJOUR EST EN CONFLIT AVEC UN DE NOS CLIENTS .\n");
+            printf("\nVOULLEZ-VOUS MODIFIER ? !!!!!( 0 pour NON et 1 pour OUI )!!!! : \n");
             int modifier;
             scanf("%d", &modifier);
             if (modifier == 1){

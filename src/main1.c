@@ -9,7 +9,7 @@ static void vider_entree(void) {
 }
 
 int main(){
-    int test, valeur, i, j, r = 0, a = 0;
+    int test, valeur, i, r = 0, a = 0;
     int compteur;
     client clientelle;
     client *reservations = NULL;
@@ -25,7 +25,7 @@ int main(){
         }
 
         printf("\n*********** repondre par '0' pour -NON- et par '1' pour -OUI- *************");
-        printf("\n---> Voulez vous annuler une reservation ? :  ");
+        printf("\n---> Voule-zvous annuler une reservation ? :  ");
         test = scanf("%d", &valeur);
         if (test != 1 || (valeur<0 || valeur>1)) vider_entree();
         while (test != 1 || (valeur<0 || valeur>1)){
