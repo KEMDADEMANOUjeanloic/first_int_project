@@ -9,61 +9,46 @@ static void vider_entree(void) {
 }
 
 int main(){
-    int test, valeur, i, r = 0, a = 0;
+    int test,valeur, r = 0, a = 0;
     int compteur;
     client clientelle;
     client *reservations = NULL;
     client *la_file = NULL;
 
     remplir_table_jours(table_jours,nombre_jours);
-
-    for (i = 0; i < 3; i++){
-        clientelle = Recupération_infos_client();
-        fonction_reservation(&reservations,&r,clientelle, &compteur);
-        if (compteur == 0){
-            file_d_attente(&la_file, &a, clientelle);
+    //affichage_planning(table_jours,reservations,r);
+    
+    do{
+        printf("\n=== CHOISIS L'ACTION A MENNER ===\n");
+        printf("----------------------------------\n | 0 ---> reservation. \n | 1 ---> annulation.\n | 2 ---> prolongement.\n | 3 ---> annonce d'un retard.\n | 4 ---> quitter;\n----------------------------------\n");
+        test = scanf("%d",&valeur);
+        if (test != 1 || valeur<0 || valeur>4) vider_entree();
+        while (test != 1 || valeur<0 || valeur>4){
+            printf("\n ERREUR. entrez une valeur entre [0;4] :");
+            test = scanf("%d",&valeur);
+            if (test != 1 || valeur<0 || valeur>4) vider_entree();
         }
-
-        printf("\n*********** repondre par '0' pour -NON- et par '1' pour -OUI- *************");
-        printf("\n---> Voule-zvous annuler une reservation ? :  ");
-        test = scanf("%d", &valeur);
-        if (test != 1 || (valeur<0 || valeur>1)) vider_entree();
-        while (test != 1 || (valeur<0 || valeur>1)){
-            printf("\n ERREUR !! saisir un entier entre [0;1] .");
-            test = scanf("%d", &valeur);
-            if (test != 1 || (valeur<0 || valeur>1)) vider_entree();
+        affichage_planning(table_jours,reservations,r);
+        if(valeur == 0){
+            clientelle = Recupération_infos_client();
+            fonction_reservation(&reservations,&r,clientelle, &compteur);
+            if (compteur == 0){
+                file_d_attente(&la_file, &a, clientelle);
+            } 
         }
         if (valeur == 1){
             annulation(reservations,&r,la_file,&a);
             affichage_planning(table_jours,reservations,r);
         }
-
-        printf("\n---> Voulez vous prolonger votre séjour ? : ");
-        test = scanf("%d", &valeur);
-        if (test != 1 || (valeur<0 || valeur>1)) vider_entree();
-        while (test != 1 || (valeur<0 || valeur>1)){
-            printf("\n ERREUR !! saisir un entier entre [0;1] .");
-            test = scanf("%d", &valeur);
-            if (test != 1 || (valeur<0 || valeur>1)) vider_entree();
-        }
-        if (valeur == 1){
+        if (valeur == 2){
             prolongement(reservations,r);
             affichage_planning(table_jours,reservations,r);
         }
-
-        printf("\n---> auriez-vous un retard ? : ");
-        test = scanf("%d", &valeur);
-        if (test != 1 || (valeur<0 || valeur>1)) vider_entree();
-        while (test != 1 || (valeur<0 || valeur>1)){
-            printf("\n ERREUR !! saisir un entier entre [0;1] .");
-            test = scanf("%d", &valeur);
-            if (test != 1 || (valeur<0 || valeur>1)) vider_entree();
-        }
-        if (valeur == 1){
+        if (valeur == 3){
             retard(reservations,r);
             affichage_planning(table_jours,reservations,r);
         }
-    }
+    }while(valeur != 4);
     
     affiche(la_file,a);
     

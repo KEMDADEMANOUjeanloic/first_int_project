@@ -45,11 +45,13 @@ void affichage_planning(jours table_jours[], client tab[], int taille_tab){
     }
     int k = 0;
     printf("\n============== planning de la chambre #10 ============\n");
-    printf("jour\t status\t    nom_occupant\n");
+    printf("========================================================\n");
+    printf("jour\t status\t         nom_occupant\n");
     for (k = 0; k < nombre_jours; k++){
         printf("========================================================\n");
         printf("|%2d\t |%-10s\t |%s\n", table_jours[k].day, table_jours[k].status, table_jours[k].nom_occupant);
     }
+    printf("========================================================\n");
 }
 
 //fonction d'annulation de reservation
@@ -58,19 +60,19 @@ void  annulation(client tab[], int *taille_tab, client tab1[], int *tab1_taille)
     int date_out, test;
     printf("\nentrez la date de début de la reservation à annuler : ");
     test = scanf("%d",&date_int);
-    if (test != 1 || date_int<1 || date_int>7 ) vider_entree();
-    while (test != 1 || date_int<1 || date_int>7){
-        printf("\n ERREUR. entrez une valeur entre [1;7] :");
+    if (test != 1 || date_int<1 || date_int>nombre_jours ) vider_entree();
+    while (test != 1 || date_int<1 || date_int>nombre_jours){
+        printf("\n ERREUR. entrez une valeur entre [1;%d] :",nombre_jours);
         test = scanf("%d",&date_int);
-        if (test != 1 || date_int<1 || date_int>7 ) vider_entree();
+        if (test != 1 || date_int<1 || date_int>nombre_jours ) vider_entree();
     }
     printf("\nentrez la date de fin de la reservation à annuler : ");
     test = scanf("%d",&date_out);
-    if (test != 1 || date_out<1 || date_out>7 ) vider_entree();
-    while (test != 1 || date_out<1 || date_out>7){
-        printf("\n ERREUR. entrez une valeur entre [1;7] :");
+    if (test != 1 || date_out<1 || date_out>nombre_jours ) vider_entree();
+    while (test != 1 || date_out<1 || date_out>nombre_jours){
+        printf("\n ERREUR. entrez une valeur entre [1;%d] :",nombre_jours);
         test = scanf("%d",&date_out);
-        if (test != 1 || date_out<1 || date_out>7 ) vider_entree();
+        if (test != 1 || date_out<1 || date_out>nombre_jours ) vider_entree();
     }
     int i, j, k, l, somme = 0;
     for (i = 0; i < *taille_tab; i++){
@@ -94,7 +96,7 @@ void  annulation(client tab[], int *taille_tab, client tab1[], int *tab1_taille)
         somme += 1;
     }
     if (somme == (*taille_tab)){
-        printf("\nRESERVATION NON TROUVÉ !!!!");
+        printf("\nRESERVATION NON TROUVÉ !!!!\n");
     }
 }
 

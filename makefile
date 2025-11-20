@@ -3,7 +3,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Iinclude
 SRC = src/main1.c src/enregistrement.c src/planification.c
 OBJ = $(SRC:.c=.o)
-EXEC = progr
+EXEC = prog
 
 #Règle par dfaut
 all: $(EXEC)

@@ -22,7 +22,7 @@ client Recupération_infos_client(){
     test = scanf("%d",&client_i.date_debut);
     if (test != 1 || client_i.date_debut<1 || client_i.date_debut>nombre_jours ) vider_entree();
     while (test != 1 || client_i.date_debut<1 || client_i.date_debut>nombre_jours){
-        printf("\n ERREUR. entrez une valeur entre [1;7] :");
+        printf("\n ERREUR. entrez une valeur entre [1;%d] :",nombre_jours);
         test = scanf("%d",&client_i.date_debut);
         if (test != 1 || client_i.date_debut<1 || client_i.date_debut>nombre_jours ) vider_entree();
     }
@@ -31,7 +31,7 @@ client Recupération_infos_client(){
     test = scanf("%d",&client_i.date_fin);
     if (test != 1 || client_i.date_fin<1 || client_i.date_fin>nombre_jours ) vider_entree();
     while (test != 1 || client_i.date_fin<1 || client_i.date_fin>nombre_jours){
-        printf("\n ERREUR. entrez une valeur entre [1;7] :");
+        printf("\n ERREUR. entrez une valeur entre [1;%d] :",nombre_jours);
         test = scanf("%d",&client_i.date_fin);
         if (test != 1 || client_i.date_fin<1 || client_i.date_fin>nombre_jours ) vider_entree();
     }
@@ -72,6 +72,7 @@ void fonction_reservation(client **reserver,int *taille_reserver, client temp, i
     *reserver = tmp;
     (*reserver)[(*taille_reserver)] = temp;
     (*taille_reserver)++;
+    affichage_planning(table_jours,*reserver,*taille_reserver);
     *comteur = 1;
     
 }

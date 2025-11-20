@@ -3,7 +3,7 @@
 #include <stddef.h>
 #define STAT_LEN 20
 #define NOM_LEN 100
-#define nombre_jours 7
+#define nombre_jours 30
 
 typedef struct{
         char nom_client[STAT_LEN];
