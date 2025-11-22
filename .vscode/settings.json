@@ -2,5 +2,6 @@
     "files.associations": {
         "planification.h": "c",
         "enregistrement.h": "c"
-    }
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

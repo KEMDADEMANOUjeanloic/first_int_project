@@ -1,4 +1,5 @@
 #variable
+LIBS = -lglut -lGLU -lGL 
 CC = gcc
 CFLAGS = -Wall -Wextra -Iinclude
 SRC = src/main1.c src/enregistrement.c src/planification.c
@@ -9,7 +10,7 @@ EXEC = prog
 all: $(EXEC)
 
 $(EXEC): $(OBJ)
-	$(CC) $(OBJ) -o $@
+	$(CC) $(OBJ) -o $@ $(LIBS)
 
 #nettoyage
 clean:

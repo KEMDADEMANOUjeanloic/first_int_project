@@ -4,6 +4,10 @@
 #define STAT_LEN 20
 #define NOM_LEN 100
 #define nombre_jours 30
+// Nom de fichier de sauvegarde
+#define FICHIER_RESERVATIONS "reservations.bin"
+#define FICHIER_ATTENTE "attente.bin"
+
 
 typedef struct{
         char nom_client[STAT_LEN];

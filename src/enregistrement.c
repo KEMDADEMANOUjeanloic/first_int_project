@@ -4,11 +4,24 @@
 #include <stdlib.h>
 #include "enregistrement.h"
 
+
 //enregistrement des client
 
 static void vider_entree(void) {
     int c;
     while ((c = getchar()) != '\n' && c != EOF) { }
+}
+
+void afficher_menu() {
+        printf("\n|======================================|\n");
+        printf("|  GESTION CHAMBRE HÔTEL #10           |\n");
+        printf("|======================================|\n");
+        printf("| 0 ---> Nouvelle réservation          |\n");
+        printf("| 1 ---> Annuler une réservation       |\n");
+        printf("| 2 ---> Prolonger un séjour           |\n");
+        printf("| 3 ---> Déclarer un retard            |\n");
+        printf("| 4 ---> Quitter                       |\n");
+        printf("|======================================|\n");
 }
 
 client Recupération_infos_client(){
@@ -30,8 +43,8 @@ client Recupération_infos_client(){
     printf("\nvotre date de fin : ");
     test = scanf("%d",&client_i.date_fin);
     if (test != 1 || client_i.date_fin<1 || client_i.date_fin>nombre_jours ) vider_entree();
-    while (test != 1 || client_i.date_fin<1 || client_i.date_fin>nombre_jours){
-        printf("\n ERREUR. entrez une valeur entre [1;%d] :",nombre_jours);
+    while (test != 1 || client_i.date_fin<1 || client_i.date_fin>nombre_jours || client_i.date_fin < client_i.date_debut){
+        printf("\n ERREUR. entrez une valeur entre [1;%d] et 'date de fin' doit etres superieure à 'date de début' :",nombre_jours);
         test = scanf("%d",&client_i.date_fin);
         if (test != 1 || client_i.date_fin<1 || client_i.date_fin>nombre_jours ) vider_entree();
     }
@@ -98,9 +111,10 @@ void file_d_attente(client **attente, int *taille_attente, client temp1){
     (*taille_attente)++; 
 } 
  
+// affichage de la file d'attente
 void affiche(client tab[], int taille){
     for (int j = 0; j < taille; j++){
-        //printf("clients reserver : \n");
+        printf("clients en attente : \n");
         printf("\n==============\n");
         printf("nom_clients: %s\n", tab[j].nom_client);
         printf("date_début: %d\n", tab[j].date_debut);
@@ -109,4 +123,76 @@ void affiche(client tab[], int taille){
     }
 }
 
+//Sauvegarde des clients dans un fichier binaire. 
+void sauvegarder_reservations(client *tab, int taille, const char *nom_fichier) {
+    FILE *f = fopen(nom_fichier, "wb");
+    if (f == NULL) {
+        perror("Erreur lors de l'ouverture du fichier pour l'écriture");
+        return;
+    }
 
+    // Écrire d'abord la taille du tableau
+    fwrite(&taille, sizeof(int), 1, f);
+
+    // Écrire ensuite le tableau complet
+    fwrite(tab, sizeof(client), taille, f);
+
+    fclose(f);
+}
+
+
+//Charge un tableau de clients à partir d'un fichier binaire.
+client *charger_reservations(int *taille, const char *nom_fichier) {
+    FILE *f = fopen(nom_fichier, "rb");
+    if (f == NULL) {
+        // Le fichier n'existe pas encore (premier lancement), on initialise à zéro.
+        *taille = 0;
+        return NULL; 
+    }
+
+    // Vérification de la taille du fichier pour s'assurer qu'il n'est pas vide
+    fseek(f, 0, SEEK_END);
+    long file_size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    // Un fichier valide doit avoir au moins la taille d'un int (pour stocker 'taille')
+    if (file_size < (long)sizeof(int)) {
+        fprintf(stderr, "Avertissement : Le fichier %s est trop petit ou vide.\n", nom_fichier);
+        *taille = 0;
+        fclose(f);
+        return NULL;
+    }
+
+    // Lire la taille du tableau
+    if (fread(taille, sizeof(int), 1, f) != 1) {
+        fprintf(stderr, "Erreur lors de la lecture de la taille dans %s\n", nom_fichier);
+        *taille = 0;
+        fclose(f);
+        return NULL;
+    }
+
+    if (*taille == 0) {
+        fclose(f);
+        return NULL;
+    }
+
+    // Allouer la mémoire pour le tableau
+    client *tab = (client *)malloc(*taille * sizeof(client));
+    if (tab == NULL) {
+        perror("Erreur d'allocation mémoire au chargement");
+        *taille = 0;
+        fclose(f);
+        return NULL;
+    }
+
+    // Lire le tableau
+    if (fread(tab, sizeof(client), *taille, f) != (size_t)*taille) {
+        fprintf(stderr, "Erreur lors de la lecture des données de client dans %s\n", nom_fichier);
+        free(tab);
+        *taille = 0;
+        tab = NULL;
+    }
+
+    fclose(f);
+    return tab;
+}

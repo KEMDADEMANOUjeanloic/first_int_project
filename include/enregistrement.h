@@ -5,6 +5,8 @@
     
     /*prototype de recuperation des infor sur les clients*/
 
+    void afficher_menu();
+    
     client Recupération_infos_client(void);
 
     void affiche(client tab[], int taille);
@@ -17,5 +19,9 @@
     
     //fonction d'annulation de reservation
     void annulation(client tab[], int *taille_tab, client tab1[], int *tab1_taille);
+
+    // prototypes pour la persistance(sauvegarde)
+    void sauvegarder_reservations(client *tab, int taille, const char *nom_fichier);
+    client *charger_reservations(int *taille, const char *nom_fichier);
 
 #endif

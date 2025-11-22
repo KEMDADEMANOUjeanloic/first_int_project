@@ -44,7 +44,7 @@ void affichage_planning(jours table_jours[], client tab[], int taille_tab){
         }
     }
     int k = 0;
-    printf("\n============== planning de la chambre #10 ============\n");
+    printf("\n============== planning de la chambre #10 ==============\n");
     printf("========================================================\n");
     printf("jour\t status\t         nom_occupant\n");
     for (k = 0; k < nombre_jours; k++){
@@ -74,18 +74,35 @@ void  annulation(client tab[], int *taille_tab, client tab1[], int *tab1_taille)
         test = scanf("%d",&date_out);
         if (test != 1 || date_out<1 || date_out>nombre_jours ) vider_entree();
     }
-    int i, j, k, l, somme = 0;
+    int i, j, k, l, q, conflit, somme = 0;
     for (i = 0; i < *taille_tab; i++){
         if (date_int == tab[i].date_debut && date_out == tab[i].date_fin){
             for (k = 0; k < *tab1_taille; k++){
-                if ((date_int == tab1[k].date_debut) && (date_out == tab1[k].date_fin)){
+                if ((date_int == tab1[k].date_debut || date_int < tab1[k].date_debut) && (date_out == tab1[k].date_fin || date_out > tab1[k].date_fin)){
                     tab[i] = tab1[k];
+                    printf("\n'%s' vous venez d'etres réserver suite a une annulation d'un client\n",tab1[k].nom_client);
                     (*tab1_taille)--;
                     for (l = k; l < (*tab1_taille); l++){
                         tab1[l] = tab1[l + 1];
                     }
                     return;
                 }
+                for (q = tab1[k].date_debut; q <= tab1[k].date_debut; q++){
+                    if (strcmp(table_jours[tab1[k].date_debut - 1].status, "OCCUPÉ") == 0){
+                        conflit = 1;
+                        break;
+                    }
+                }
+                if (conflit != 1){
+                    tab[i] = tab1[k];
+                    printf("\n'%s' vous venez d'etres réserver suite a une annulation d'un client\n",tab1[k].nom_client);
+                    (*tab1_taille)--;
+                    for (l = k; l < (*tab1_taille); l++){
+                        tab1[l] = tab1[l + 1];
+                    }
+                    return;
+                }
+                
             }
             (*taille_tab)--;
             for (j = i; j < (*taille_tab); j++){
