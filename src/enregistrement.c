@@ -12,7 +12,7 @@ static void vider_entree(void) {
     while ((c = getchar()) != '\n' && c != EOF) { }
 }
 
-void afficher_menu() {
+void afficher_menu() {      
         printf("\n|======================================|\n");
         printf("|  GESTION CHAMBRE HÔTEL #10           |\n");
         printf("|======================================|\n");
@@ -22,6 +22,8 @@ void afficher_menu() {
         printf("| 3 ---> Déclarer un retard            |\n");
         printf("| 4 ---> Quitter                       |\n");
         printf("|======================================|\n");
+        printf("Choisis l'action à mennée! :");
+        
 }
 
 client Recupération_infos_client(){
@@ -70,6 +72,7 @@ void fonction_reservation(client **reserver,int *taille_reserver, client temp, i
                 return;
             }else{
                 *comteur = 0;
+                printf("Vous avez été placer en file d'attente !");
                 return;
             }
             
@@ -86,6 +89,7 @@ void fonction_reservation(client **reserver,int *taille_reserver, client temp, i
     (*reserver)[(*taille_reserver)] = temp;
     (*taille_reserver)++;
     affichage_planning(table_jours,*reserver,*taille_reserver);
+    printf("Votre réservation à été ajouter!");
     *comteur = 1;
     
 }

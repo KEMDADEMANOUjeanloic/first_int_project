@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "enregistrement.h"
 #include "planification.h"
 
@@ -176,54 +177,84 @@ void prolongement(client tab[], int taille_tab){
 }
 
 // fontion de planification de retard
-void retard(client tab[], int taille_tab){
+void retard(client **tab, int *taille_tab, client clientDeLaFile[], int *tailleDeLaFile){
     int found = -1;
-    char nom [50];
+    char nom[50];
     int new_date;
-    int test = 0;
-    printf("\n=== Entrez votre non de reservation : ");
+
+    printf("\n=== Entrez votre nom de reservation : ");
     vider_entree();
-    if (fgets(nom, sizeof(nom), stdin) == NULL){
-        printf("\n ERREUR de saisie de nom");
-        vider_entree();
-        return;
-    }
-    nom[strcspn(nom,"\n")] = '\0';
+    fgets(nom, sizeof(nom), stdin);
+    nom[strcspn(nom, "\n")] = '\0';
 
     printf("\n=== Entrez votre nouvelle date de debut : ");
-    test = scanf("%d", &new_date);
-    if (test != 1) vider_entree();
-    while (test != 1){
-        printf("\n=== Entrez une date de debut VALIDE !! : ");
-        test = scanf("%d", &new_date);
-        if (test != 1) vider_entree();
+    while (scanf("%d", &new_date) != 1) {
+        vider_entree();
+        printf("Date invalide, recommencez : ");
     }
-    if ((new_date < 1) || (new_date > nombre_jours)){
-        printf("\n=== Se jour ne figure pas sur notre planning ===");
+
+    if (new_date < 1 || new_date > nombre_jours) {
+        printf("\n=== Jour invalide ===");
         return;
     }
-    for(int i = 0; i < taille_tab; i++){
-        if (strcmp(nom, tab[i].nom_client) == 0){
-            found = i ;
+
+    // Recherche du client 
+    for (int i = 0; i < *taille_tab; i++) {
+        if (strcmp(nom, (*tab)[i].nom_client) == 0) {
+            found = i;
             break;
         }
     }
-    if(found == -1){
-        printf("\n === aucune reservation sous le nom de ( %s )", nom);
+
+    if (found == -1) {
+        printf("\n=== Reservation introuvable ===");
         return;
     }
-    if ( new_date <= tab[found].date_debut ){
-        printf("\n votre nouvelle date doit etres strictement superieure à votre date de début (%d)", tab[found].date_debut);
+
+    if (new_date <= (*tab)[found].date_debut) {
+        printf("\nNouvelle date invalide");
         return;
     }
-    if (new_date > tab[found].date_fin) {
-        printf("\n=== La nouvelle date (%d) dépasse la date de fin (%d) de votre réservation ===\n",
-               new_date, tab[found].date_fin);
-        return;
+
+    (*tab)[found].date_debut = new_date;
+    printf("\n=== Retard applique avec succes ===\n");
+
+    // Vérifier si quelqu’un de la file peut être planifié 
+    for (int k = 0; k < *tailleDeLaFile; k++) {
+        int conflit = 0;
+
+        for (int j = 0; j < *taille_tab; j++) {
+            if (!((*tab)[j].date_fin < clientDeLaFile[k].date_debut ||
+                  clientDeLaFile[k].date_fin < (*tab)[j].date_debut)) {
+                conflit = 1;
+                break;
+            }
+        }
+
+        if (!conflit) {
+            client *tmp = realloc(*tab, (*taille_tab + 1) * sizeof(client));
+            if (!tmp) {
+                printf("\nErreur mémoire");
+                return;
+            }
+
+            *tab = tmp;
+            (*tab)[*taille_tab] = clientDeLaFile[k];
+            (*taille_tab)++;
+
+            // Supprimer de la file 
+            for (int l = k; l < *tailleDeLaFile - 1; l++)
+                clientDeLaFile[l] = clientDeLaFile[l + 1];
+
+            (*tailleDeLaFile)--;
+
+            printf("\n'%s' a été planifié depuis la file d'attente\n",
+                   clientDeLaFile[k].nom_client);
+            break;
+        }
     }
-    tab[found].date_debut = new_date;
-    printf("\n=== Votre date de début a été mise à jour : nouvelle date = %d ===\n", new_date);
 }
+
 
 
 

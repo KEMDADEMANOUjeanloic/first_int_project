@@ -29,8 +29,6 @@ int main(){
     //affichage_planning(table_jours,reservations,r);
     
     do{
-        //printf("\n=== CHOISIS L'ACTION A MENNER ===\n");
-        //printf("----------------------------------\n | 0 ---> reservation. \n | 1 ---> annulation.\n | 2 ---> prolongement.\n | 3 ---> annonce d'un retard.\n | 4 ---> quitter;\n----------------------------------\n");
         afficher_menu();
         test = scanf("%d",&valeur);
         if (test != 1 || valeur<0 || valeur>4) vider_entree();
@@ -57,7 +55,7 @@ int main(){
             affichage_planning(table_jours,reservations,r);
         }
         if (valeur == 3){
-            retard(reservations,r);
+            retard(&reservations,&r,la_file,&a);
             affichage_planning(table_jours,reservations,r);
         }
     }while(valeur != 4);

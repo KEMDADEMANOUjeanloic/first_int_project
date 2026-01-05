@@ -15,7 +15,8 @@
     void prolongement(client tab[], int taille_tab);
 
     // fontion de planification de retard
-    void retard(client tab[], int taille_tab);
+    void retard(client **tab, int *taille_tab, client clientDeLaFile[], int *tailleDeLaFile);
+    //void retard(client tab[], int taille_tab);
 
    
 #endif
