@@ -53,6 +53,27 @@ GdkRGBA generate_color(const char *nom) {
     return color;
 }
 
+/* Normalize a client name: trim whitespace and lowercase into dst (size dstlen) */
+static void normalize_name(const char *src, char *dst, size_t dstlen) {
+    if (!src || dstlen == 0) { if (dstlen) dst[0] = '\0'; return; }
+    const char *s = src;
+    while (*s && g_ascii_isspace((gchar)*s)) s++;
+    const char *e = src + strlen(src) - 1;
+    while (e >= s && g_ascii_isspace((gchar)*e)) e--;
+    size_t n = (e >= s) ? (size_t)(e - s + 1) : 0;
+    size_t copy = (n < dstlen-1) ? n : dstlen-1;
+    for (size_t i = 0; i < copy; i++) dst[i] = g_ascii_tolower((gchar)s[i]);
+    dst[copy] = '\0';
+}
+
+/* Case-insensitive, trimmed comparison for client names */
+static int name_equal(const char *a, const char *b) {
+    char na[STAT_LEN]; char nb[STAT_LEN];
+    normalize_name(a, na, sizeof(na));
+    normalize_name(b, nb, sizeof(nb));
+    return strcmp(na, nb) == 0;
+}
+
 int check_conflict(int d1, int d2) {
     for (int i = 0; i < nb_reservations; i++) {
         if (!(reservations[i].date_fin < d1 || d2 < reservations[i].date_debut))
@@ -92,13 +113,27 @@ void update_calendar() {
         int day = i + 1;
         const char *occupant = get_occupant(day);
 
-        char label[100];
-        if (occupant)
-            snprintf(label, 100, "Jour %d\n%.10s", day, occupant);
-        else
-            snprintf(label, 100, "Jour %d\nLibre", day);
-
-        gtk_button_set_label(GTK_BUTTON(day_buttons[i]), label);
+        /* Use Pango markup so the occupant name is bold; safely escape the text */
+        GtkWidget *child = gtk_widget_get_first_child(day_buttons[i]);
+        if (occupant) {
+            gchar *markup = g_markup_printf_escaped("Jour %d\n<b>%s</b>", day, occupant);
+            if (child && GTK_IS_LABEL(child)) gtk_label_set_markup(GTK_LABEL(child), markup);
+            else {
+                GtkWidget *lbl = gtk_label_new(NULL);
+                gtk_label_set_markup(GTK_LABEL(lbl), markup);
+                gtk_button_set_child(GTK_BUTTON(day_buttons[i]), lbl);
+            }
+            g_free(markup);
+        } else {
+            gchar *markup = g_markup_printf_escaped("Jour %d\nLibre", day);
+            if (child && GTK_IS_LABEL(child)) gtk_label_set_markup(GTK_LABEL(child), markup);
+            else {
+                GtkWidget *lbl = gtk_label_new(NULL);
+                gtk_label_set_markup(GTK_LABEL(lbl), markup);
+                gtk_button_set_child(GTK_BUTTON(day_buttons[i]), lbl);
+            }
+            g_free(markup);
+        }
 
         GdkRGBA color;
         get_day_color(day, &color);
@@ -346,8 +381,10 @@ void apply_css() {
         ".waiting-header { font-weight: bold; background: #eeeeee; border: 2px solid #999999; padding:6px; }"
         ".waiting-cell { border: 2px solid #dddddd; padding:6px; }"
         ".waiting-empty { font-style: italic; color: #666666; padding:6px; }"
-        ".action-button { font-weight: bold; padding: 8px 12px; }"
-        ".help-button { font-weight: bold; background: #eeeeff; padding: 4px 8px; }";
+    ".action-button { font-weight: bold; padding: 8px 12px; }"
+    ".help-button { font-weight: bold; background: #eeeeff; padding: 4px 8px; }"
+    ".help-circle { min-width: 34px; min-height: 34px; max-width: 34px; max-height: 34px; border-radius: 20px; background: #3b82f6; color: white; padding: 0; }"
+    ".help-label { font-weight: bold; color: white; font-size: 14px; }";
     gtk_css_provider_load_from_data(provider, css, -1);
     gtk_style_context_add_provider_for_display(
         gdk_display_get_default(),
@@ -430,7 +467,11 @@ void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *btn_annuler = gtk_button_new_with_label("Annuler");
     GtkWidget *btn_retard = gtk_button_new_with_label("Retard");
     GtkWidget *btn_prolong = gtk_button_new_with_label("Prolonger");
-    GtkWidget *btn_help = gtk_button_new_with_label("Aide");
+    /* small circular help button with '?' label */
+    GtkWidget *btn_help = gtk_button_new();
+    GtkWidget *help_lbl = gtk_label_new("?");
+    gtk_widget_add_css_class(help_lbl, "help-label");
+    gtk_button_set_child(GTK_BUTTON(btn_help), help_lbl);
     g_signal_connect(btn_reserver, "clicked", G_CALLBACK(on_new_reservation_clicked), NULL);
     g_signal_connect(btn_annuler, "clicked", G_CALLBACK(on_cancel_clicked), NULL);
     g_signal_connect(btn_retard, "clicked", G_CALLBACK(on_delay_clicked), NULL);
@@ -441,7 +482,7 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_widget_add_css_class(btn_annuler, "action-button");
     gtk_widget_add_css_class(btn_retard, "action-button");
     gtk_widget_add_css_class(btn_prolong, "action-button");
-    gtk_widget_add_css_class(btn_help, "help-button");
+    gtk_widget_add_css_class(btn_help, "help-circle");
     gtk_box_append(GTK_BOX(action_box), btn_reserver);
     gtk_box_append(GTK_BOX(action_box), btn_annuler);
     gtk_box_append(GTK_BOX(action_box), btn_retard);
@@ -707,7 +748,7 @@ static void prolong_response_cb(GtkDialog *dialog, int response, gpointer user_d
         int newend = atoi(gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY(d->entry_newend))));
         int found = -1;
         for (int i = 0; i < nb_reservations; i++) {
-            if (strcmp(reservations[i].nom_client, nom) == 0) { found = i; break; }
+        if (name_equal(reservations[i].nom_client, nom)) { found = i; break; }
         }
         if (found == -1) {
             show_message(GTK_WINDOW(d->dialog), "Non trouvé", "Aucune réservation sous ce nom.");
@@ -771,7 +812,7 @@ void on_prolong_clicked(GtkWidget *button, gpointer data) {
     int newend = atoi(s_newend);
     int found = -1;
     for (int i = 0; i < nb_reservations; i++) {
-        if (strcmp(reservations[i].nom_client, nom) == 0) { found = i; break; }
+    if (name_equal(reservations[i].nom_client, nom)) { found = i; break; }
     }
     if (found == -1) {
         show_message(GTK_WINDOW(window), "Non trouvé", "Aucune réservation sous ce nom.");
@@ -804,7 +845,7 @@ static void delay_response_cb(GtkDialog *dialog, int response, gpointer user_dat
         int newstart = atoi(gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY(d->entry_newstart))));
         int found = -1;
         for (int i = 0; i < nb_reservations; i++) {
-            if (strcmp(reservations[i].nom_client, nom) == 0) { found = i; break; }
+        if (name_equal(reservations[i].nom_client, nom)) { found = i; break; }
         }
         if (found == -1) {
             show_message(GTK_WINDOW(d->dialog), "Non trouvé", "Aucune réservation sous ce nom.");
@@ -837,6 +878,9 @@ static void delay_response_cb(GtkDialog *dialog, int response, gpointer user_dat
         /* reservations[found].date_fin remains old_end */
         update_calendar();
         update_list_view();
+        /* After applying a delay, try to promote someone from the waiting list */
+        try_promote_from_waiting();
+        update_waiting_view();
         show_message(GTK_WINDOW(d->dialog), "Retard", "Retard appliqué avec succès.");
     }
     gtk_window_destroy(GTK_WINDOW(d->dialog));
@@ -854,7 +898,7 @@ void on_delay_clicked(GtkWidget *button, gpointer data) {
     int newstart = atoi(s_newstart);
     int found = -1;
     for (int i = 0; i < nb_reservations; i++) {
-        if (strcmp(reservations[i].nom_client, nom) == 0) { found = i; break; }
+    if (name_equal(reservations[i].nom_client, nom)) { found = i; break; }
     }
     if (found == -1) {
         show_message(GTK_WINDOW(window), "Non trouvé", "Aucune réservation sous ce nom.");
@@ -878,6 +922,9 @@ void on_delay_clicked(GtkWidget *button, gpointer data) {
     reservations[found].date_debut = new_start;
     update_calendar();
     update_list_view();
+    /* After applying a delay, try to promote someone from the waiting list */
+    try_promote_from_waiting();
+    update_waiting_view();
     show_message(GTK_WINDOW(window), "Retard", "Retard appliqué avec succès.");
     /* All done; previous dialog-based code removed. */
 }
